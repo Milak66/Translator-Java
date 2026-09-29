@@ -15,21 +15,29 @@ public class Translator {
     }
 
     public String translate(String text, String targetLanguage) {
-        MyMemoryResponse response = restClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/get")
-                        .queryParam("q", text)
-                        .queryParam("langpair", "en|" + targetLanguage)
-                        .build())
-                .retrieve()
-                .body(MyMemoryResponse.class);
+        try {
+            MyMemoryResponse response = restClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/get")
+                            .queryParam("q", text)
+                            .queryParam("langpair", "en|" + targetLanguage)
+                            .build())
+                    .retrieve()
+                    .body(MyMemoryResponse.class);
 
-        if (response == null || response.responseData() == null) {
-            throw new RuntimeException("Translation failed");
+            if (response == null || response.responseData() == null) {
+                throw new RuntimeException("MyMemory returned an empty response");
+            }
+
+            return response.responseData().translatedText();
+
+        } catch (Exception e) {
+            System.err.println("TRANSLATION ERROR:");
+            e.printStackTrace();
+
+            throw new RuntimeException("Translation API failed: " + e.getMessage(), e);
         }
-
-        return response.responseData().translatedText();
     }
 
     private record MyMemoryResponse(
