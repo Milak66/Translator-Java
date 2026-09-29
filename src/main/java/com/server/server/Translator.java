@@ -33,7 +33,7 @@ public class Translator {
             return response.responseData().translatedText();
 
         } catch (Exception e) {
-            System.err.println("TRANSLATION ERROR:");
+            System.err.println("Translation error:");
             e.printStackTrace();
 
             throw new RuntimeException("Translation API failed: " + e.getMessage(), e);
