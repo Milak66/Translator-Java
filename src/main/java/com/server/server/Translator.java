@@ -9,13 +9,8 @@ public class Translator {
     private final RestClient restClient;
 
     public Translator(RestClient.Builder builder) {
-        String libreTranslateUrl = System.getenv().getOrDefault(
-                "LIBRETRANSLATE_URL",
-                "http://localhost:5871"
-        );
-
         this.restClient = builder
-                .baseUrl(libreTranslateUrl)
+                .baseUrl("https://libretranslate.com")
                 .build();
     }
 
