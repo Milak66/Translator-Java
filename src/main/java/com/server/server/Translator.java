@@ -10,36 +10,35 @@ public class Translator {
 
     public Translator(RestClient.Builder builder) {
         this.restClient = builder
-                .baseUrl("https://libretranslate.com")
+                .baseUrl("https://api.mymemory.translated.net")
                 .build();
     }
 
     public String translate(String text, String targetLanguage) {
-        LibreTranslateResponse response = restClient
-                .post()
-                .uri("/translate")
-                .body(new LibreTranslateRequest(
-                        text,
-                        "auto",
-                        targetLanguage
-                ))
+        String translatedText = restClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/get")
+                        .queryParam("q", text)
+                        .queryParam("langpair", "auto|" + targetLanguage)
+                        .build())
                 .retrieve()
-                .body(LibreTranslateResponse.class);
+                .body(MyMemoryResponse.class)
+                .responseData()
+                .translatedText();
 
-        if (response == null || response.translatedText() == null) {
+        if (translatedText == null || translatedText.isBlank()) {
             throw new RuntimeException("Translation failed");
         }
 
-        return response.translatedText();
+        return translatedText;
     }
 
-    private record LibreTranslateRequest(
-            String q,
-            String source,
-            String target
+    private record MyMemoryResponse(
+            ResponseData responseData
     ) {}
 
-    private record LibreTranslateResponse(
+    private record ResponseData(
             String translatedText
     ) {}
 }
