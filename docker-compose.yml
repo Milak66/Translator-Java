@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: .
+    container_name: lingua-backend
+    ports:
+      - "8777:8777"
+    environment:
+      PORT: 8777
+      LIBRETRANSLATE_URL: http://libretranslate:5000
+    depends_on:
+      - libretranslate
+
+  libretranslate:
+    image: libretranslate/libretranslate
+    container_name: lingua-libretranslate
+    ports:
+      - "5871:5000"
+    volumes:
+      - libretranslate-data:/home/libretranslate/.local
+    command:
+      - --load-only
+      - en,es,fr,de,it,pt,ru,uk,pl,nb,sv,da,fi,nl
+
+volumes:
+  libretranslate-data:

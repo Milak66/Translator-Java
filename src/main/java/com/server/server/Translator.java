@@ -9,42 +9,42 @@ public class Translator {
     private final RestClient restClient;
 
     public Translator(RestClient.Builder builder) {
+        String libreTranslateUrl = System.getenv().getOrDefault(
+                "LIBRETRANSLATE_URL",
+                "http://localhost:5871"
+        );
+
         this.restClient = builder
-                .baseUrl("https://api.mymemory.translated.net")
+                .baseUrl(libreTranslateUrl)
                 .build();
     }
 
     public String translate(String text, String targetLanguage) {
-        try {
-            MyMemoryResponse response = restClient
-                    .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/get")
-                            .queryParam("q", text)
-                            .queryParam("langpair", "en|" + targetLanguage)
-                            .build())
-                    .retrieve()
-                    .body(MyMemoryResponse.class);
+        LibreTranslateResponse response = restClient
+                .post()
+                .uri("/translate")
+                .body(new LibreTranslateRequest(
+                        text,
+                        "auto",
+                        targetLanguage
+                ))
+                .retrieve()
+                .body(LibreTranslateResponse.class);
 
-            if (response == null || response.responseData() == null) {
-                throw new RuntimeException("MyMemory returned an empty response");
-            }
-
-            return response.responseData().translatedText();
-
-        } catch (Exception e) {
-            System.err.println("Translation error:");
-            e.printStackTrace();
-
-            throw new RuntimeException("Translation API failed: " + e.getMessage(), e);
+        if (response == null || response.translatedText() == null) {
+            throw new RuntimeException("Translation failed");
         }
+
+        return response.translatedText();
     }
 
-    private record MyMemoryResponse(
-            ResponseData responseData
+    private record LibreTranslateRequest(
+            String q,
+            String source,
+            String target
     ) {}
 
-    private record ResponseData(
+    private record LibreTranslateResponse(
             String translatedText
     ) {}
 }
