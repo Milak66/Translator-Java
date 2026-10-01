@@ -15,23 +15,23 @@ public class Translator {
     }
 
     public String translate(String text, String targetLanguage) {
-        String translatedText = restClient
+        MyMemoryResponse response = restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/get")
                         .queryParam("q", text)
-                        .queryParam("langpair", "auto|" + targetLanguage)
+                        .queryParam("langpair", "en|" + targetLanguage)
                         .build())
                 .retrieve()
-                .body(MyMemoryResponse.class)
-                .responseData()
-                .translatedText();
+                .body(MyMemoryResponse.class);
 
-        if (translatedText == null || translatedText.isBlank()) {
+        if (response == null
+                || response.responseData() == null
+                || response.responseData().translatedText() == null) {
             throw new RuntimeException("Translation failed");
         }
 
-        return translatedText;
+        return response.responseData().translatedText();
     }
 
     private record MyMemoryResponse(
